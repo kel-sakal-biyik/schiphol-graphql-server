@@ -1,48 +1,133 @@
 # schiphol-graphql-api
-Before we start to build our server, we have a bit more preparations to do. After these
-our local environment will be ready.
+Let's start with creating a `src` folder to separate our soon to be generated
+code from our source code. Go ahead and create it however you like it.
 
-First, we will install TypeScript. It is a superset of JavaScript which allows us to use
-types. Since GraphQL is type-safe why won't our code be type-safe as well?
+To organize our folder structure, create `types` and `resolvers` folders under `src`
+Their name actually giving their purposes away. We're going to keep our GraphQL types and
+resolvers under `types` and `resolvers` folders respectively.
 
-Go ahead and add TypeScript to our dependencies:
+We will fill these folders soon enough, but first we need our GraphQL server application to
+serve those types from.
 
-`npm i -D typescript` or `npm install --save-dev typescript` to be verbose.
+Since we will use TypeScript go ahead and create `index.ts` file under `src` folder. This will
+contain all of our server logic.
 
-You might already noticed `.tsconfig.json` file under our root folder. This configures the 
-TypeScript compiler. You don't need to worry about this one. If you want to know more about it
-you can visit [here](http://www.typescriptlang.org/docs/handbook/tsconfig-json.html)
+Ok, we said we will create an Express application. To do that we need firs import express in
+our project. Add the following line to your `index.ts` file
 
-Next, we need ts-node package to be able to execute TypeScript code in node environment. I will
-show you how to use this in coming steps. For now, just add it to your dependencies.
+`import * as express from 'express';`
 
-`npm i -D ts-node`  
+Our responses from our server need to be in JSON format. We need `body-parser` middleware for that
 
-Although, `graphql-tools` allows us to use GraphQL schema language and create our types
-using strings, there is a better way to define our types and schema: Using `.graphql` files.
-To be able to work with them add `merge-graphql-schemas` to your dependencies.
+`import * as bodyParser from 'body-parser';`
 
-`npm i -S merge-graphql-schemas`
+We will use Apollo's express server middleware to handle the communication between our client and server
+applications. We will also use Graphiql middleware. Graphiql is an in-browser query builder and schema
+explorer. We will see it in action in our next steps.
 
-This relieves us from the burden of concatenating our types to provide them together to our
-executable schema generator. Additionally, `.graphql` files are recognized by the IDE plugins
-and allows us to navigate through our schema. WebStorm and VSCode have plugins for GraphQL.
+`import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';`
 
-Here are the links for the plugins. I strongly recommend you to install them:
+There is also another crucial middleware that we need to install at this point. It is `cors`.
+Since our client-side and server-side app will be working on different ports, we will use this
+middleware to overcome cross-origin request issues.
 
-- [WebStorm Plugin](https://plugins.jetbrains.com/plugin/8097-js-graphql) 
-- [VSCode Plugin](https://github.com/kumarharsh/graphql-for-vscode)
+Add it to your dependencies now:
 
-Last but not least, `graphql-codegen` will help us to automatically generate TypeScript types
-for both our server and client side applications. Add it to your dev dependencies.
+`npm i -D cors`
 
-`npm i graphql-code-generator`
+Then import it like below:
 
-Cool, now we are ready to start building our application! Proceed with the next step.
+`import * as cors from 'cors';`
 
-`git checkout step-2`
+Our final import will be `makeExecutableSchema` from `graphql-tools`. Which is responsible for creating
+our schema out of the type that we will provide.
 
-**_TIP:_** _You can use the following command to add an alias for `git checkout <branch>` to shorten it like 
-`git co <branch>` We all like to type less :)_
+`import { makeExecutableSchema } from 'graphql-tools';`
 
-`git config --global alias.co checkout`
+Our building blocks are in place to create our server. First, we need an express app. Let's create one.
+
+`const app = express();`
+
+That's was easy! We need some data to show. For now we can use a static object as our data source
+
+```typescript
+const flightList = [
+  {
+    "flightName": "HV5804",
+    "scheduleDate": "2018-02-07",
+  },
+  {
+    "flightName": "PC1256",
+    "scheduleDate": "2018-02-07",
+  }
+];
+```
+
+Now we need a schema and resolver to serve with our `graphqlExpress` middleware. You can use the simple
+schema below:
+
+```typescript
+const typeDefs = `
+  type Query { 
+    flights: [Flight] 
+  }
+  type Flight { 
+    flightName: String
+    scheduleDate: String 
+  }
+`;
+
+const resolvers = {
+  Query: { flights: () => flightList },
+};
+```
+
+Let's create our schema out of these types with the help of `makeExecutableSchema`. I know
+we used string to define our schema but hey, one step at a time.
+
+```typescript
+const schema = makeExecutableSchema({
+  typeDefs,
+  resolvers,
+});
+```
+
+We almost there. Since our application is called a GraphQL server, it needs some endpoints that
+we can expose for the consumers. We will define two endpoints. First one will be the one that will
+executes our queries and returns the responses. Second one will serve our graphiql app which I
+mentioned before.
+
+Our endpoints will use the middlewares provided by Apollo server. And also the `cors` middleware 
+will be used on our `/graphql` endpoint
+
+```typescript
+app.use('/graphql', bodyParser.json(), cors(), graphqlExpress({ schema }));
+
+app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }));
+```
+
+The finishing touch will be to define a port for our server to listen to.
+
+```typescript
+app.listen(9999, () => {
+  console.log('GraphQL server is running on http://localhost:9090/graphql');
+  console.log('To explore your schema, visit http://localhost:9090/grapihql');
+});
+```
+
+Here we have our simple GraphQL server,ready to use. But, how are we going to run this?
+It is written in TypeScript, even though we are not using the types yet, it needs to be 
+compiled to JavaScript. Remember that we installed `ts-node`? That will help us to do so.
+
+Open your `package.json` and add the following script.
+
+`"start": "nodemon src/index.ts --watch src --exec ts-node"`
+
+Now run it in your terminal like:
+
+`npm run start`
+
+Visit your graphiql application and have a look around. When you are done you can
+go to the next step. 
+
+`git co step-3`
