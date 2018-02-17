@@ -2,33 +2,13 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
 import { makeExecutableSchema } from 'graphql-tools';
+import * as path from 'path';
+import { fileLoader, mergeTypes, mergeResolvers } from 'merge-graphql-schemas';
+
+const typeDefs = mergeTypes(fileLoader(path.join(__dirname, './types'), { recursive: true }));
+const resolvers = mergeResolvers(fileLoader(path.join(__dirname, './resolvers'), { recursive: true }));
 
 const app = express();
-
-const flightList = [
-    {
-        "flightName": "HV5804",
-        "scheduleDate": "2018-02-07",
-    },
-    {
-        "flightName": "PC1256",
-        "scheduleDate": "2018-02-07",
-    }
-];
-
-const typeDefs = `
-  type Query { 
-    flights: [Flight] 
-  }
-  type Flight { 
-    flightName: String
-    scheduleDate: String 
-  }
-`;
-
-const resolvers = {
-    Query: { flights: () => flightList },
-};
 
 const schema = makeExecutableSchema({
     typeDefs,

@@ -1,89 +1,201 @@
 # schiphol-graphql-api
-Pretty quick and easy right? Now we have an actual working GraphQL server.
-Yes, it is serving mock data but still. To quickly bootstrap our server we
-used string types. Let's change it and create our `.graphql` files.
+To be able to work with a real API we need to work with promises. Luckily,
+we have a good request library which returns promises. Add it to your
+dependencies with:
 
-Let's remember our little schema:
+`npm i -S request request-promise-native`
 
-```ecmascript 6
-const typeDefs = `
-  type Query { 
-    flights: [Flight] 
-  }
-  type Flight { 
-    flightName: String
-    scheduleDate: String 
-  }
-`;
-```
+Now we will be able to make a request to our API. We will be using Schiphol API
+as our data source. Since we already created our flight type lets make a request
+to `/flights` endpoint. Check the below link out:
 
-We need a new type file under our `types` folder. Create `flight.graphql` file under 
-`types`. And then, simply copy the types inside the template string and paste them inside
-`flight.graphql`. Now you can remove `const typeDefs` from `index.ts`.
+`https://api.schiphol.nl/public-flights/flights?app_id=[APP_ID]&app_key=[APP_KEY]&includedelays=false&page=0&sort=%2Bscheduletime`
 
-Next, we can put our only resolver as a separate file under `resolvers` folder to better
-organize and modularize our code.
+This is how we can request data from `/flights` endpoint. As you can see you need
+APP_ID and APP_KEY to be able to make a request. You can use the id and the key provided
+in the slides for this workshop. If you want to continue on this project afterwards,
+you need to create yourself an account and use your own keys.
 
-Take our resolver and its data and put them in a new file called `flight.ts` under
-`resolvers` folder like below:
+One more important detail about the Schiphol API is that requests require `RessourceVersion`
+in request headers. For our case we will be using `v3`. 
+
+So, how can we make this request using our `request-promise-native` library?
+
+First, we need to import the library in our `flight.ts` file
+
+`import * as request from 'request-promise-native';`
+
+And set the options for our request.
 
 ```typescript
-const flightList = [
-    {
-        "flightName": "HV5804",
-        "scheduleDate": "2018-02-07",
+const options = {
+    uri: 'https://api.schiphol.nl/public-flights/flights',
+    qs: {
+        app_id: 'XXXXX',
+        app_key: 'XXXXX',
+        includedelays: false,
+        page: 0,
+        sort:'+scheduletime'
     },
+    headers: {
+        'ResourceVersion': 'v3'
+    },
+    json: true
+};
+```
+
+Now we can replace our resolver function for for flights field with
+our request library. Obviously, we won't need the mock data we used before.
+Feel free to delete that one too.
+
+```typescript
+export default {
+    Query: {
+        flights: (): Flight => request(options)
+    }
+};
+```
+
+Let's have a look the response that we expect from this call: 
+
+```json
+{
+  "flights": [
     {
-        "flightName": "PC1256",
-        "scheduleDate": "2018-02-07",
+      "actualLandingTime": "2018-02-12T21:23:54.889Z",
+      "actualOffBlockTime": "2018-02-12T21:23:54.889Z",
+      "aircraftRegistration": "string",
+      "aircraftType": {
+        "iatamain": "string",
+        "iatasub": "string"
+      },
+      "baggageClaim": {
+        "belts": [
+          "string"
+        ]
+      },
+      "checkinAllocations": {
+        "checkinAllocations": [
+          {
+            "endTime": "2018-02-12T21:23:54.889Z",
+            "rows": {
+              "rows": [
+                {
+                  "desks": {
+                    "desks": [
+                      {
+                        "checkinClass": {
+                          "code": "string",
+                          "description": "string"
+                        },
+                        "position": 0
+                      }
+                    ]
+                  },
+                  "position": "string"
+                }
+              ]
+            },
+            "startTime": "2018-02-12T21:23:54.889Z"
+          }
+        ],
+        "remarks": {
+          "remarks": [
+            "string"
+          ]
+        }
+      },
+      "codeshares": {
+        "codeshares": [
+          "string"
+        ]
+      },
+      "estimatedLandingTime": "2018-02-12T21:23:54.889Z",
+      "expectedTimeBoarding": "2018-02-12T21:23:54.889Z",
+      "expectedTimeGateClosing": "2018-02-12T21:23:54.889Z",
+      "expectedTimeGateOpen": "2018-02-12T21:23:54.889Z",
+      "expectedTimeOnBelt": "2018-02-12T21:23:54.889Z",
+      "flightDirection": "A",
+      "flightName": "string",
+      "flightNumber": 0,
+      "gate": "string",
+      "id": "string",
+      "mainFlight": "string",
+      "prefixIATA": "string",
+      "prefixICAO": "string",
+      "publicEstimatedOffBlockTime": "2018-02-12T21:23:54.889Z",
+      "publicFlightState": {
+        "flightStates": [
+          "string"
+        ]
+      },
+      "route": {
+        "destinations": [
+          "string"
+        ]
+      },
+      "scheduleDate": "string",
+      "scheduleTime": "string",
+      "schemaVersion": "string",
+      "serviceType": "SCHEDULED_PASSENGER_SERVICE",
+      "terminal": 0,
+      "transferPositions": {
+        "transferPositions": [
+          0
+        ]
+      }
     }
-];
-
-export default {
-    Query: { 
-        flights: () => flightList 
-    }
+  ],
+  "schemaVersion": "string"
 }
 ```
 
-Now we need to load these files in our `index.ts` file. We will use 
-`merge-graphql-schemas` library as a helper. It will recursively traverse
-`resolvers` and `types` folders and merge them.
+Wow, that's what I call a "response"! It is easy to notice that the response
+has `flights` key. However we need to return its from our resolver. Let's fix 
+that.
 
 ```typescript
-import * as path from 'path';
-import { fileLoader, mergeTypes, mergeResolvers } from 'merge-graphql-schemas';
-
-const typeDefs = mergeTypes(fileLoader(path.join(__dirname, './types'), { recursive: true }));
-const resolvers = mergeResolvers(fileLoader(path.join(__dirname, './resolvers'), { recursive: true }));
-```
-
-From now on, whenever you add a new type or resolver under your `types` and `resolvers` 
-folders respectively, they will be available in your schema. 
-
-Let's take it further and create TypeScript types out of our schema. Then we can use this in
-our resolvers. `graphql-code-generator` will be our tool. It basically introspects our graphql
-server and additionally it uses the `.graphql` files to create those. So, that means our server
-needs to be running. Let's run it:
-
-`npm run start`
-
-Next add the following `gql-gen` script in our `package.json`
-
-`"gql-gen": "gql-gen --url http://localhost:9999/graphql --template typescript --out ./src/typings/graphql-typings.d.ts ./src/**/*.graphql"`
-
-Cool! We can use it in our resolver now in `flight.ts` under `resolvers`.
-
-```typescript
-import { Flight } from '../typings/graphql-typings';
-
 export default {
-    Query: { 
-        flights: (): Flight => flightList 
+    Query: {
+        flights: (): Flight => request(options).then(data => data.flights)
     }
+};
+```
+ 
+
+Cool! Now look at our `Flight` type:
+
+```typescript
+type Flight {
+    flightName: String
+    scheduleDate: String
 }
 ```
 
-Now we are ready to use a real data source. Continue with the next step.
+`Apparently, we only need `flightName` and `scheduleDate`, and that's what we will get.
+Again if you observe our `flights` query, you will see that `flights` field is expecting
+an array of `Flight` type.
 
-`git co step-4`
+When we run our query, we need to see something like this:
+
+```
+[
+  {
+      "flightName": "string",
+      "scheduleDate": "string"
+  },
+  {
+      "flightName": "string",
+      "scheduleDate": "string"
+  },
+  .
+  .
+  .
+]
+``` 
+
+Open your graphiql app and give it a try.
+
+If you got a similar response, well done! You can proceed with the next step.
+
+`git co step-5`

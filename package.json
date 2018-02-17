@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon src/index.ts --watch src/**/*.* --exec ts-node",
+    "gql-gen": "gql-gen --url http://localhost:9999/graphql --template typescript --out ./src/typings/graphql-typings.d.ts ./src/**/*.graphql",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

@@ -1,0 +1,8 @@
+type Flight {
+    flightName: String
+    scheduleDate: String
+}
+
+type Query {
+    flights: [Flight]
+}
