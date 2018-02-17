@@ -1,72 +1,11 @@
 # schiphol-graphql-api
-Let's start with creating a `src` folder to separate our soon to be generated
-code from our source code. Go ahead and create it however you like it.
+Pretty quick and easy right? Now we have an actual working GraphQL server.
+Yes, it is serving mock data but still. To quickly bootstrap our server we
+used string types. Let's change it and create our `.graphql` files.
 
-To organize our folder structure, create `types` and `resolvers` folders under `src`
-Their name actually giving their purposes away. We're going to keep our GraphQL types and
-resolvers under `types` and `resolvers` folders respectively.
+Let's remember our little schema:
 
-We will fill these folders soon enough, but first we need our GraphQL server application to
-serve those types from.
-
-Since we will use TypeScript go ahead and create `index.ts` file under `src` folder. This will
-contain all of our server logic.
-
-Ok, we said we will create an Express application. To do that we need firs import express in
-our project. Add the following line to your `index.ts` file
-
-`import * as express from 'express';`
-
-Our responses from our server need to be in JSON format. We need `body-parser` middleware for that
-
-`import * as bodyParser from 'body-parser';`
-
-We will use Apollo's express server middleware to handle the communication between our client and server
-applications. We will also use Graphiql middleware. Graphiql is an in-browser query builder and schema
-explorer. We will see it in action in our next steps.
-
-`import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';`
-
-There is also another crucial middleware that we need to install at this point. It is `cors`.
-Since our client-side and server-side app will be working on different ports, we will use this
-middleware to overcome cross-origin request issues.
-
-Add it to your dependencies now:
-
-`npm i -D cors`
-
-Then import it like below:
-
-`import * as cors from 'cors';`
-
-Our final import will be `makeExecutableSchema` from `graphql-tools`. Which is responsible for creating
-our schema out of the type that we will provide.
-
-`import { makeExecutableSchema } from 'graphql-tools';`
-
-Our building blocks are in place to create our server. First, we need an express app. Let's create one.
-
-`const app = express();`
-
-That's was easy! We need some data to show. For now we can use a static object as our data source
-
-```typescript
-const flightList = [
-  {
-    "flightName": "HV5804",
-    "scheduleDate": "2018-02-07",
-  },
-  {
-    "flightName": "PC1256",
-    "scheduleDate": "2018-02-07",
-  }
-];
-```
-
-Now we need a schema and resolver to serve with our `graphqlExpress` middleware. You can use the simple
-schema below:
-
-```typescript
+```ecmascript 6
 const typeDefs = `
   type Query { 
     flights: [Flight] 
@@ -76,58 +15,75 @@ const typeDefs = `
     scheduleDate: String 
   }
 `;
-
-const resolvers = {
-  Query: { flights: () => flightList },
-};
 ```
 
-Let's create our schema out of these types with the help of `makeExecutableSchema`. I know
-we used string to define our schema but hey, one step at a time.
+We need a new type file under our `types` folder. Create `flight.graphql` file under 
+`types`. And then, simply copy the types inside the template string and paste them inside
+`flight.graphql`. Now you can remove `const typeDefs` from `index.ts`.
+
+Next, we can put our only resolver as a separate file under `resolvers` folder to better
+organize and modularize our code.
+
+Take our resolver and its data and put them in a new file called `flight.ts` under
+`resolvers` folder like below:
 
 ```typescript
-const schema = makeExecutableSchema({
-  typeDefs,
-  resolvers,
-});
+const flightList = [
+    {
+        "flightName": "HV5804",
+        "scheduleDate": "2018-02-07",
+    },
+    {
+        "flightName": "PC1256",
+        "scheduleDate": "2018-02-07",
+    }
+];
+
+export default {
+    Query: { 
+        flights: () => flightList 
+    }
+}
 ```
 
-We almost there. Since our application is called a GraphQL server, it needs some endpoints that
-we can expose for the consumers. We will define two endpoints. First one will be the one that will
-executes our queries and returns the responses. Second one will serve our graphiql app which I
-mentioned before.
-
-Our endpoints will use the middlewares provided by Apollo server. And also the `cors` middleware 
-will be used on our `/graphql` endpoint
+Now we need to load these files in our `index.ts` file. We will use 
+`merge-graphql-schemas` library as a helper. It will recursively traverse
+`resolvers` and `types` folders and merge them.
 
 ```typescript
-app.use('/graphql', bodyParser.json(), cors(), graphqlExpress({ schema }));
+import * as path from 'path';
+import { fileLoader, mergeTypes, mergeResolvers } from 'merge-graphql-schemas';
 
-app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }));
+const typeDefs = mergeTypes(fileLoader(path.join(__dirname, './types'), { recursive: true }));
+const resolvers = mergeResolvers(fileLoader(path.join(__dirname, './resolvers'), { recursive: true }));
 ```
 
-The finishing touch will be to define a port for our server to listen to.
+From now on, whenever you add a new type or resolver under your `types` and `resolvers` 
+folders respectively, they will be available in your schema. 
 
-```typescript
-app.listen(9999, () => {
-  console.log('GraphQL server is running on http://localhost:9090/graphql');
-  console.log('To explore your schema, visit http://localhost:9090/grapihql');
-});
-```
-
-Here we have our simple GraphQL server,ready to use. But, how are we going to run this?
-It is written in TypeScript, even though we are not using the types yet, it needs to be 
-compiled to JavaScript. Remember that we installed `ts-node`? That will help us to do so.
-
-Open your `package.json` and add the following script.
-
-`"start": "nodemon src/index.ts --watch src --exec ts-node"`
-
-Now run it in your terminal like:
+Let's take it further and create TypeScript types out of our schema. Then we can use this in
+our resolvers. `graphql-code-generator` will be our tool. It basically introspects our graphql
+server and additionally it uses the `.graphql` files to create those. So, that means our server
+needs to be running. Let's run it:
 
 `npm run start`
 
-Visit your graphiql application and have a look around. When you are done you can
-go to the next step. 
+Next add the following `gql-gen` script in our `package.json`
 
-`git co step-3`
+`"gql-gen": "gql-gen --url http://localhost:9999/graphql --template typescript --out ./src/typings/graphql-typings.d.ts ./src/**/*.graphql"`
+
+Cool! We can use it in our resolver now in `flight.ts` under `resolvers`.
+
+```typescript
+import { Flight } from '../typings/graphql-typings';
+
+export default {
+    Query: { 
+        flights: (): Flight => flightList 
+    }
+}
+```
+
+Now we are ready to use a real data source. Continue with the next step.
+
+`git co step-4`
