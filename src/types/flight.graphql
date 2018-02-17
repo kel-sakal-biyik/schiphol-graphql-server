@@ -1,8 +1,10 @@
 type Flight {
     flightName: String
-    scheduleDate: String
+    scheduleTime: String
+    airlineConnection: Airline
+    destinationConnection: Destination
 }
 
 type Query {
-    flights: [Flight]
+    flights(scheduleDate: String, scheduleTime: String): [Flight]
 }

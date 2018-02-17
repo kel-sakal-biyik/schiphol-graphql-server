@@ -1,0 +1,4 @@
+type Airline {
+    iata: String
+    publicName: String
+}
