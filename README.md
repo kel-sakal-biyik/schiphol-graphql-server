@@ -9,7 +9,7 @@ Go ahead and add TypeScript to our dependencies:
 
 `npm i -D typescript` or `npm install --save-dev typescript` to be verbose.
 
-You might already noticed `.tsconfig.json` file under our root folder. This configures the 
+You might already noticed `tsconfig.json` file under our root folder. This configures the
 TypeScript compiler. You don't need to worry about this one. If you want to know more about it
 you can visit [here](http://www.typescriptlang.org/docs/handbook/tsconfig-json.html)
 
