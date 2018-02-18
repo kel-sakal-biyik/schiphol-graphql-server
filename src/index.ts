@@ -42,5 +42,5 @@ app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }));
 
 app.listen(9999, () => {
     console.log('GraphQL server is running on http://localhost:9999/graphql');
-    console.log('To explore your schema, visit http://localhost:9999/grapihql');
+    console.log('To explore your schema, visit http://localhost:9999/graphiql');
 });
