@@ -61,7 +61,7 @@ const resolvers = mergeResolvers(fileLoader(path.join(__dirname, './resolvers'),
 Let's install @types/node package so that TypeScript can recognize node packages and global node variables.
 
 ```bash
-npm i -D ts-node
+npm i -D @types/node
 ```
 
 From now on, whenever you add a new type or resolver under your `types` and `resolvers` 
