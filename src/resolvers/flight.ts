@@ -18,6 +18,6 @@ const options = {
 
 export default {
     Query: {
-        flights: (): Flight => request(options).then(data => data.flights)
+        flights: (): Flight[] => request(options).then(data => data.flights)
     }
 };
