@@ -85,7 +85,7 @@ import { Flight } from '../typings/graphql-typings';
 
 export default {
     Query: { 
-        flights: (): Flight => flightList 
+        flights: (): Flight[] => flightList
     }
 }
 ```
