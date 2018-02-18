@@ -13,6 +13,6 @@ const flightList = [
 
 export default {
     Query: {
-        flights: (): Flight => flightList
+        flights: (): Flight[] => flightList
     }
 };

@@ -16,7 +16,7 @@ APP_ID and APP_KEY to be able to make a request. You can use the id and the key 
 in the slides for this workshop. If you want to continue on this project afterwards,
 you need to create yourself an account and use your own keys.
 
-One more important detail about the Schiphol API is that requests require `RessourceVersion`
+One more important detail about the Schiphol API is that requests require `ResourceVersion`
 in request headers. For our case we will be using `v3`. 
 
 So, how can we make this request using our `request-promise-native` library?
@@ -51,7 +51,7 @@ Feel free to delete that one too.
 ```typescript
 export default {
     Query: {
-        flights: (): Flight => request(options)
+        flights: (): Flight[] => request(options)
     }
 };
 ```
@@ -157,7 +157,7 @@ that.
 ```typescript
 export default {
     Query: {
-        flights: (): Flight => request(options).then(data => data.flights)
+        flights: (): Flight[] => request(options).then(data => data.flights)
     }
 };
 ```
