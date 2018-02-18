@@ -10,7 +10,7 @@ using `merge-graphql-schemas`
 Here comes your challenge. You will write an Angular application which
 will show the today's upcoming flights and their info.
 
-Upcoming flights can be obtaned via using `scheduledate` (yyyy-MM-dd) and
+Upcoming flights can be obtained via using `scheduledate` (yyyy-MM-dd) and
 `scheduletime` (HH:mm) query parameters in your request.
 
 To feed your front end application you need to provide the necessary information
