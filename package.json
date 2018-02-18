@@ -29,7 +29,6 @@
     "merge-graphql-schemas": "^1.4.0"
   },
   "devDependencies": {
-    "@types/node": "^9.4.6",
     "cors": "^2.8.4",
     "nodemon": "^1.14.12",
     "ts-node": "^4.1.0",
