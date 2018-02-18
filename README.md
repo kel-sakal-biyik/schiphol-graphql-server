@@ -58,6 +58,12 @@ const typeDefs = mergeTypes(fileLoader(path.join(__dirname, './types'), { recurs
 const resolvers = mergeResolvers(fileLoader(path.join(__dirname, './resolvers'), { recursive: true }));
 ```
 
+Let's install @types/node package so that TypeScript can recognize node packages and global node variables.
+
+```bash
+npm i -D ts-node
+```
+
 From now on, whenever you add a new type or resolver under your `types` and `resolvers` 
 folders respectively, they will be available in your schema. 
 
