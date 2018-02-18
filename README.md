@@ -12,7 +12,7 @@ serve those types from.
 Since we will use TypeScript go ahead and create `index.ts` file under `src` folder. This will
 contain all of our server logic.
 
-Ok, we said we will create an Express application. To do that we need firs import express in
+Ok, we said we will create an Express application. To do that we need first import express in
 our project. Add the following line to your `index.ts` file
 
 `import * as express from 'express';`
@@ -48,7 +48,7 @@ Our building blocks are in place to create our server. First, we need an express
 
 `const app = express();`
 
-That's was easy! We need some data to show. For now we can use a static object as our data source
+That was easy! We need some data to show. For now we can use a static object as our data source
 
 ```typescript
 const flightList = [
@@ -92,9 +92,9 @@ const schema = makeExecutableSchema({
 });
 ```
 
-We almost there. Since our application is called a GraphQL server, it needs some endpoints that
+We're almost there. Since our application is called a GraphQL server, it needs some endpoints that
 we can expose for the consumers. We will define two endpoints. First one will be the one that will
-executes our queries and returns the responses. Second one will serve our graphiql app which I
+execute our queries and return the responses. Second one will serve our graphiql app which I
 mentioned before.
 
 Our endpoints will use the middlewares provided by Apollo server. And also the `cors` middleware 
@@ -110,8 +110,8 @@ The finishing touch will be to define a port for our server to listen to.
 
 ```typescript
 app.listen(9999, () => {
-  console.log('GraphQL server is running on http://localhost:9090/graphql');
-  console.log('To explore your schema, visit http://localhost:9090/grapihql');
+  console.log('GraphQL server is running on http://localhost:9999/graphql');
+  console.log('To explore your schema, visit http://localhost:9999/graphiql');
 });
 ```
 
