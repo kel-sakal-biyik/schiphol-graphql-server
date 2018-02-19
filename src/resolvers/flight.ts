@@ -3,7 +3,7 @@ import { Airline, Flight, Destination, FlightsQueryArgs } from '../typings/graph
 
 export default {
     Query: {
-        flights: (_, args: FlightsQueryArgs): Flight =>
+        flights: (_, args: FlightsQueryArgs): Flight[] =>
             getFlights(args.scheduleDate, args.scheduleTime).catch(err => console.log('API ERROR:', err.message))
     },
     Flight: {
