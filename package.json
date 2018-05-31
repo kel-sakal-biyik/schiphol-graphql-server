@@ -20,21 +20,21 @@
   },
   "homepage": "https://github.com/kel-sakal-biyik/schiphol-graphql-api#readme",
   "dependencies": {
-    "apollo-server-express": "^1.3.2",
-    "body-parser": "^1.18.2",
-    "express": "^4.16.2",
+    "apollo-server-express": "^1.3.6",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
     "graphql": "^0.11.7",
-    "graphql-code-generator": "^0.8.14",
-    "graphql-tools": "^2.20.0",
-    "merge-graphql-schemas": "^1.4.0",
-    "request": "^2.83.0",
+    "graphql-code-generator": "^0.8.21",
+    "graphql-tools": "^2.24.0",
+    "merge-graphql-schemas": "^1.5.1",
+    "request": "^2.87.0",
     "request-promise-native": "^1.0.5"
   },
   "devDependencies": {
     "@types/node": "^9.4.6",
     "cors": "^2.8.4",
-    "nodemon": "^1.14.12",
+    "nodemon": "^1.17.5",
     "ts-node": "^4.1.0",
-    "typescript": "^2.7.1"
+    "typescript": "^2.9.1"
   }
 }
